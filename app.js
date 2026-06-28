@@ -98,9 +98,30 @@ function buildFilename() {
   return base + "-" + stamp + ".pdf";
 }
 
+// --- בדיקה אם ה‑canvas יצא ריק (לבן) — קורה בחלק מהדפדפנים בטלפון ---
+function isCanvasBlank(canvas) {
+  try {
+    const ctx = canvas.getContext("2d");
+    const w = canvas.width;
+    const h = canvas.height;
+    if (!w || !h) return true;
+    const data = ctx.getImageData(0, 0, w, h).data;
+    let nonWhite = 0;
+    for (let i = 0; i < data.length; i += 4 * 37) {
+      if (data[i] < 245 || data[i + 1] < 245 || data[i + 2] < 245) {
+        nonWhite++;
+        if (nonWhite > 20) return false; // ברור שיש תוכן
+      }
+    }
+    return nonWhite < 5;
+  } catch (e) {
+    return false; // אם אי אפשר לקרוא — לא מניחים שריק
+  }
+}
+
 // --- בניית עותק נקי לצילום ---
-// חשוב: מצלמים אלמנט שנמצא *על המסך* (לא מחוץ לו), כי כשמצלמים אלמנט מוסתר
-// מחוץ למסך חלק מהדפדפנים מפיקים עמוד ריק. מכסים את המסך בלבן זמנית.
+// מצלמים אלמנט שנמצא *על המסך* (מכוסה בלבן), בודקים שהתוצאה לא ריקה,
+// ורק אז יוצרים PDF. אם ה‑canvas ריק — זורקים שגיאה כדי לעבור להדפסה.
 async function generatePdfBlob() {
   const clone = page.cloneNode(true);
   clone.style.position = "static"; // בתצוגה ה‑.page הוא absolute — מחזירים לזרימה רגילה
@@ -113,7 +134,6 @@ async function generatePdfBlob() {
   const cloneBody = clone.querySelector(".page-body");
   if (cloneBody) cloneBody.classList.remove("is-empty");
 
-  // עוטף את העותק בפינה השמאלית‑עליונה (על המסך) — צילום אמין
   const wrap = document.createElement("div");
   wrap.style.position = "fixed";
   wrap.style.left = "0";
@@ -123,7 +143,6 @@ async function generatePdfBlob() {
   wrap.style.zIndex = "2147483646";
   wrap.appendChild(clone);
 
-  // כיסוי לבן מעל הכול כדי שלא יראו הבזק בזמן הצילום
   const cover = document.createElement("div");
   cover.style.position = "fixed";
   cover.style.inset = "0";
@@ -133,22 +152,39 @@ async function generatePdfBlob() {
   document.body.appendChild(wrap);
   document.body.appendChild(cover);
 
+  const prevScroll = window.scrollY;
+  window.scrollTo(0, 0); // עוזר ל‑iOS Safari לצלם נכון
+
   try {
     const opt = {
       margin: 0,
       image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
+      html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollX: 0, scrollY: 0 },
       jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       pagebreak: { mode: ["css", "legacy"] },
     };
-    return await html2pdf().set(opt).from(clone).outputPdf("blob");
+    const worker = html2pdf().set(opt).from(clone);
+    const canvas = await worker.toCanvas().get("canvas");
+    if (isCanvasBlank(canvas)) {
+      const err = new Error("BLANK_CANVAS");
+      err.code = "BLANK";
+      throw err;
+    }
+    return await worker.toImg().toPdf().outputPdf("blob");
   } finally {
     wrap.remove();
     cover.remove();
+    window.scrollTo(0, prevScroll);
   }
 }
 // חשיפה לבדיקות אוטומטיות
 window.__generatePdfBlob = generatePdfBlob;
+
+// --- גיבוי: הדפסה דרך הדפדפן (אמין במיוחד בטלפון; אפשר "שמור כ‑PDF" / לשתף) ---
+function printFallback() {
+  window.print();
+}
+window.__printFallback = printFallback;
 
 // --- הורדה רגילה (מחשב / דפדפן ללא שיתוף קבצים) ---
 function downloadBlob(blob, filename) {
@@ -198,7 +234,7 @@ async function handleDownload() {
   txtEl.textContent = "מכינה PDF...";
 
   let blob, filename;
-  // שלב היצירה — אם נכשל, מציגים את השגיאה האמיתית (לאבחון)
+  // שלב היצירה
   try {
     if (document.fonts && document.fonts.ready) {
       await document.fonts.ready;
@@ -208,13 +244,18 @@ async function handleDownload() {
     blob = await generatePdfBlob();
   } catch (err) {
     console.error("PDF generation failed:", err);
-    alert(
-      "אירעה תקלה ביצירת ה‑PDF.\n(" +
-        (err && err.message ? err.message : String(err)) +
-        ")\nנסי שוב, ואם זה חוזר — רעננו את הדף."
-    );
     downloadBtn.disabled = false;
     txtEl.textContent = originalText;
+    if (err && err.code === "BLANK") {
+      // הדפדפן הפיק עמוד ריק — עוברים אוטומטית להדפסה (אמין בטלפון)
+      printFallback();
+    } else {
+      alert(
+        "אירעה תקלה ביצירת ה‑PDF.\n(" +
+          (err && err.message ? err.message : String(err)) +
+          ")\nאפשר לנסות את כפתור «הדפסה / שמירה» שמתחת לכפתור."
+      );
+    }
     return;
   }
 
@@ -241,6 +282,13 @@ docTitleInput.addEventListener("input", updatePreview);
 bodyTextInput.addEventListener("input", updatePreview);
 showDateInput.addEventListener("change", updatePreview);
 downloadBtn.addEventListener("click", handleDownload);
+const printLink = document.getElementById("printLink");
+if (printLink) {
+  printLink.addEventListener("click", function (e) {
+    e.preventDefault();
+    printFallback();
+  });
+}
 window.addEventListener("resize", layout);
 window.addEventListener("load", updatePreview);
 
