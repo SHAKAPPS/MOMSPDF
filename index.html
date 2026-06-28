@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>יצירת מסמך PDF עם לוגו</title>
+  <meta name="description" content="כלי פשוט להוספת לוגו לטקסט והורדה כקובץ PDF" />
+  <link rel="icon" type="image/png" href="logos/boaz.png" />
+
+  <!-- גופן עברי נעים -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <h1>יצירת מסמך&nbsp;PDF עם לוגו</h1>
+      <p class="subtitle">בוחרים לוגו · מדביקים טקסט · מורידים&nbsp;PDF</p>
+    </div>
+  </header>
+
+  <main class="layout">
+
+    <!-- ===== צד עריכה ===== -->
+    <section class="editor" aria-label="עריכת המסמך">
+
+      <ol class="steps">
+        <li><span class="num">1</span> בחרי את הלוגו</li>
+        <li><span class="num">2</span> הדביקי את הטקסט</li>
+        <li><span class="num">3</span> לחצי «הורדה כ‑PDF»</li>
+      </ol>
+
+      <!-- שלב 1 -->
+      <h2 class="field-title">1. בחירת לוגו</h2>
+      <div class="logo-picker" id="logoPicker">
+        <label class="logo-card">
+          <input type="radio" name="logo" value="boaz" checked />
+          <img src="logos/boaz.png" alt="המשתלה של בועז" />
+          <span class="logo-name">המשתלה של בועז</span>
+        </label>
+        <label class="logo-card">
+          <input type="radio" name="logo" value="gardenit" />
+          <img src="logos/gardenit.png" alt="GARDENIT LTD" />
+          <span class="logo-name">GARDENIT&nbsp;LTD</span>
+        </label>
+      </div>
+
+      <!-- שלב 2 -->
+      <h2 class="field-title">2. הטקסט / הצעת המחיר</h2>
+
+      <label class="mini-label" for="docTitle">כותרת (לא חובה)</label>
+      <input id="docTitle" class="text-input" type="text" placeholder="לדוגמה: הצעת מחיר לגינון" />
+
+      <label class="mini-label" for="bodyText">הדביקי כאן את הטקסט</label>
+      <textarea id="bodyText" class="text-area" placeholder="הדביקי כאן את הטקסט או הצעת המחיר שכתבת...&#10;&#10;אפשר להדביק עם Ctrl+V"></textarea>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="showDate" checked />
+        להוסיף את התאריך של היום למסמך
+      </label>
+
+      <!-- שלב 3 -->
+      <button id="downloadBtn" class="download-btn" type="button">
+        <span class="dl-icon">📄</span>
+        <span class="dl-text">שמירה / שליחה כ‑PDF</span>
+      </button>
+      <p class="hint">בטלפון ייפתח תפריט שיתוף — אפשר לשלוח בוואטסאפ או לשמור ב«קבצים».<br />במחשב הקובץ יישמר בתיקיית «ההורדות».</p>
+
+    </section>
+
+    <!-- ===== צד תצוגה מקדימה ===== -->
+    <section class="preview-pane" aria-label="תצוגה מקדימה">
+      <div class="preview-label">תצוגה מקדימה של המסמך</div>
+      <div class="page-holder" id="pageHolder">
+        <!-- זהו בדיוק מה שייצא ל‑PDF -->
+        <div class="page" id="page">
+          <div class="page-logo-wrap">
+            <img class="page-logo" id="pageLogo" src="logos/boaz.png" alt="לוגו" />
+          </div>
+          <div class="page-date" id="pageDate"></div>
+          <div class="page-divider"></div>
+          <h2 class="page-title" id="pageTitle" hidden></h2>
+          <div class="page-body" id="pageBody"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ספריית יצירת ה‑PDF (מקומית, ללא תלות באינטרנט) -->
+  <script src="vendor/html2pdf.bundle.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

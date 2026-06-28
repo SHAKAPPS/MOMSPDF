@@ -1,0 +1,301 @@
+:root {
+  --green: #4a8a3d;
+  --green-dark: #356a2b;
+  --green-light: #eaf3e6;
+  --ink: #2b2b26;
+  --gray: #6b7280;
+  --line: #e2e5e0;
+  --bg: #f4f6f2;
+  --radius: 14px;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Rubik", "Segoe UI", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== Top bar ===== */
+.topbar {
+  background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+  color: #fff;
+  padding: 22px 16px;
+  text-align: center;
+}
+.topbar h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+.subtitle {
+  margin: 6px 0 0;
+  font-size: 1rem;
+  opacity: 0.92;
+  font-weight: 500;
+}
+
+/* ===== Layout ===== */
+.layout {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: grid;
+  grid-template-columns: minmax(320px, 460px) 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ===== Editor panel ===== */
+.editor {
+  background: #fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px 20px 26px;
+  position: sticky;
+  top: 16px;
+}
+
+.steps {
+  list-style: none;
+  margin: 0 0 18px;
+  padding: 14px 16px;
+  background: var(--green-light);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.98rem;
+  font-weight: 500;
+}
+.steps li { display: flex; align-items: center; gap: 10px; }
+.steps .num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--green);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.9rem;
+  flex: 0 0 auto;
+}
+
+.field-title {
+  font-size: 1.12rem;
+  font-weight: 700;
+  margin: 22px 0 12px;
+  color: var(--green-dark);
+}
+.field-title:first-of-type { margin-top: 6px; }
+
+/* ===== Logo picker ===== */
+.logo-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.logo-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 10px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.05s;
+  min-height: 120px;
+}
+.logo-card:hover { border-color: var(--green); }
+.logo-card:active { transform: scale(0.99); }
+.logo-card img {
+  max-width: 100%;
+  max-height: 64px;
+  object-fit: contain;
+}
+.logo-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray);
+  text-align: center;
+}
+.logo-card input { position: absolute; opacity: 0; pointer-events: none; }
+.logo-card:has(input:checked) {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(74, 138, 61, 0.18);
+  background: var(--green-light);
+}
+.logo-card:has(input:checked) .logo-name { color: var(--green-dark); }
+
+/* ===== Inputs ===== */
+.mini-label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray);
+  margin: 14px 0 6px;
+}
+.text-input,
+.text-area {
+  width: 100%;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--ink);
+  background: #fff;
+  transition: border-color 0.15s;
+}
+.text-input:focus,
+.text-area:focus {
+  outline: none;
+  border-color: var(--green);
+}
+.text-area {
+  min-height: 220px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 4px;
+  font-size: 0.98rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.checkbox-row input { width: 20px; height: 20px; accent-color: var(--green); }
+
+/* ===== Download button ===== */
+.download-btn {
+  width: 100%;
+  margin-top: 22px;
+  padding: 16px;
+  border: none;
+  border-radius: 12px;
+  background: var(--green);
+  color: #fff;
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: background 0.15s, transform 0.05s;
+}
+.download-btn:hover { background: var(--green-dark); }
+.download-btn:active { transform: scale(0.99); }
+.download-btn:disabled { background: #9bb593; cursor: progress; }
+.dl-icon { font-size: 1.35rem; }
+
+.hint {
+  margin: 10px 2px 0;
+  font-size: 0.85rem;
+  color: var(--gray);
+  text-align: center;
+}
+
+/* ===== Preview pane ===== */
+.preview-pane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.preview-label {
+  align-self: flex-start;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--gray);
+  margin: 4px 4px 12px;
+}
+.page-holder {
+  position: relative;       /* contains the scaled page */
+  overflow: hidden;         /* clip the un-scaled layout box -> no page overflow */
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: var(--shadow);
+  /* width/height set by JS to the scaled page size */
+}
+
+/* ===== THE DOCUMENT (this is exactly what becomes the PDF) ===== */
+.page {
+  position: absolute;       /* out of flow so it can't widen the page */
+  top: 0;
+  right: 0;
+  width: 210mm;
+  min-height: 297mm;
+  background: #fff;
+  padding: 18mm 16mm;
+  transform-origin: top right; /* RTL: scale from the right */
+  color: #222;
+}
+.page-logo-wrap {
+  text-align: center;
+  margin-bottom: 6mm;
+}
+.page-logo {
+  max-height: 28mm;
+  max-width: 70%;
+  object-fit: contain;
+}
+.page-date {
+  text-align: left;
+  font-size: 11pt;
+  color: #555;
+  min-height: 1em;
+}
+.page-divider {
+  height: 2px;
+  background: var(--green);
+  opacity: 0.65;
+  margin: 4mm 0 7mm;
+  border-radius: 2px;
+}
+.page-title {
+  font-size: 19pt;
+  font-weight: 700;
+  text-align: center;
+  margin: 0 0 6mm;
+  color: var(--green-dark);
+}
+.page-body {
+  font-size: 13pt;
+  line-height: 1.85;
+  text-align: right;
+  white-space: pre-wrap;     /* keep line breaks & spaces from the pasted text */
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-height: 40mm;
+  color: #333;
+}
+.page-body.is-empty::before {
+  content: "כאן יופיע הטקסט שתדביקי...";
+  color: #bcbcbc;
+}
+
+/* ===== Responsive (phone / tablet) ===== */
+@media (max-width: 880px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+  .editor { position: static; }
+  .preview-pane { margin-top: 8px; }
+  .topbar h1 { font-size: 1.3rem; }
+}

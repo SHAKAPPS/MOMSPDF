@@ -1,0 +1,12 @@
+# OS / editor junk
+Thumbs.db
+Desktop.ini
+.DS_Store
+*~
+
+# Node (not used at runtime, but just in case)
+node_modules/
+
+# Local test artifacts
+scratchpad/
+*.log

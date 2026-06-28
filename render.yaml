@@ -1,0 +1,10 @@
+# Render Blueprint — אתר סטטי (Static Site)
+# אם תחברו את ה‑repo ב‑Render בלחיצה על "New Blueprint", זה ייקח את ההגדרות מכאן.
+# אפשר גם פשוט ליצור Static Site ידנית ולהשאיר Publish Directory ריק / נקודה (.)
+services:
+  - type: web
+    name: gardenit-quotes
+    runtime: static
+    buildCommand: ""
+    staticPublishPath: .
+    pullRequestPreviewsEnabled: false
