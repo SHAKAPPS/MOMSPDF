@@ -64,7 +64,7 @@
         <span class="dl-icon">📄</span>
         <span class="dl-text">שמירה / שליחה כ‑PDF</span>
       </button>
-      <p class="hint">ייפתח חלון שמירה:<br />📱 בטלפון — בוחרים «שמור בקבצים» או שולחים בוואטסאפ.<br />💻 במחשב — בוחרים «שמירה כ‑PDF» (Save as PDF) כיעד.</p>
+      <p class="hint">📱 בטלפון ייפתח תפריט שיתוף — אפשר לשלוח בוואטסאפ או לשמור ב«קבצים».<br />💻 במחשב הקובץ יישמר בתיקיית «ההורדות».</p>
 
     </section>
 
@@ -87,8 +87,13 @@
 
   </main>
 
-  <!-- לוגואים מוטמעים -->
+  <!-- ספריות יצירת PDF (מקומיות, ללא תלות באינטרנט) -->
+  <script src="vendor/pdf-lib.min.js"></script>
+  <script src="vendor/fontkit.umd.min.js"></script>
+  <script src="vendor/bidi.min.js"></script>
+  <!-- נתונים מוטמעים: לוגואים + גופן עברי -->
   <script src="logo-data.js"></script>
+  <script src="font-data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
