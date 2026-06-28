@@ -162,41 +162,73 @@ function downloadBlob(blob, filename) {
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-// --- הפעולה הראשית: בטלפון פותח תפריט שיתוף, במחשב מוריד קובץ ---
+// --- מסירת הקובץ: שיתוף → הורדה → פתיחה בלשונית. אף פעם לא מציג שגיאה מפחידה ---
+async function deliverPdf(blob, filename) {
+  // 1) טלפון: תפריט שיתוף (וואטסאפ / מייל / שמירה בקבצים)
+  try {
+    const file = new File([blob], filename, { type: "application/pdf" });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], title: filename });
+      return;
+    }
+  } catch (err) {
+    if (err && err.name === "AbortError") return; // המשתמשת ביטלה את השיתוף
+    // אחרת — ממשיכים להורדה
+  }
+
+  // 2) מחשב / דפדפן ללא שיתוף: הורדה רגילה
+  try {
+    downloadBlob(blob, filename);
+    return;
+  } catch (err) {
+    /* ממשיכים לפתיחה בלשונית */
+  }
+
+  // 3) מוצא אחרון: פתיחת ה‑PDF בלשונית חדשה (שם אפשר לשמור/לשתף ידנית)
+  const url = URL.createObjectURL(blob);
+  window.open(url, "_blank");
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+}
+
+// --- הפעולה הראשית ---
 async function handleDownload() {
   const txtEl = downloadBtn.querySelector(".dl-text");
   const originalText = txtEl.textContent;
   downloadBtn.disabled = true;
   txtEl.textContent = "מכינה PDF...";
 
+  let blob, filename;
+  // שלב היצירה — אם נכשל, מציגים את השגיאה האמיתית (לאבחון)
   try {
     if (document.fonts && document.fonts.ready) {
       await document.fonts.ready;
     }
     await imageReady(pageLogo);
-
-    const blob = await generatePdfBlob();
-    const filename = buildFilename();
-    const file = new File([blob], filename, { type: "application/pdf" });
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      // טלפון: תפריט שיתוף (וואטסאפ / מייל / שמירה בקבצים)
-      try {
-        await navigator.share({ files: [file], title: filename });
-      } catch (err) {
-        if (err && err.name === "AbortError") {
-          // המשתמשת ביטלה — לא עושים כלום
-        } else {
-          downloadBlob(blob, filename);
-        }
-      }
-    } else {
-      // מחשב: הורדה רגילה
-      downloadBlob(blob, filename);
-    }
+    filename = buildFilename();
+    blob = await generatePdfBlob();
   } catch (err) {
-    console.error(err);
-    alert("אירעה תקלה ביצירת ה‑PDF. נסי שוב, ואם זה חוזר — רעננו את הדף.");
+    console.error("PDF generation failed:", err);
+    alert(
+      "אירעה תקלה ביצירת ה‑PDF.\n(" +
+        (err && err.message ? err.message : String(err)) +
+        ")\nנסי שוב, ואם זה חוזר — רעננו את הדף."
+    );
+    downloadBtn.disabled = false;
+    txtEl.textContent = originalText;
+    return;
+  }
+
+  // שלב המסירה — חסין לתקלות, לא מציג שגיאה
+  try {
+    await deliverPdf(blob, filename);
+  } catch (err) {
+    console.error("delivery failed:", err);
+    try {
+      const url = URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch (e) {
+      /* אין מה לעשות יותר */
+    }
   } finally {
     downloadBtn.disabled = false;
     txtEl.textContent = originalText;
