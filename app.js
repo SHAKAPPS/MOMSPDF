@@ -17,9 +17,12 @@ const pageTitle = document.getElementById("pageTitle");
 const pageBody = document.getElementById("pageBody");
 const previewPane = document.querySelector(".preview-pane");
 
+// מקור הלוגו לתצוגה ול‑PDF: data‑URI מוטמע אם קיים (מונע "tainted canvas"),
+// אחרת קובץ רגיל כגיבוי.
+const LOGO_DATA = window.LOGO_DATA || {};
 const LOGOS = {
-  boaz: "logos/boaz.png",
-  gardenit: "logos/gardenit.png",
+  boaz: LOGO_DATA.boaz || "logos/boaz.png",
+  gardenit: LOGO_DATA.gardenit || "logos/gardenit.png",
 };
 
 // --- עדכון התצוגה המקדימה (וכך גם ה‑PDF) ---
@@ -95,10 +98,12 @@ function buildFilename() {
   return base + "-" + stamp + ".pdf";
 }
 
-// --- בניית עותק נקי לצילום (בלי קנה‑מידה ובלי גובה כפוי) כדי למנוע עמוד ריק ---
+// --- בניית עותק נקי לצילום ---
+// חשוב: מצלמים אלמנט שנמצא *על המסך* (לא מחוץ לו), כי כשמצלמים אלמנט מוסתר
+// מחוץ למסך חלק מהדפדפנים מפיקים עמוד ריק. מכסים את המסך בלבן זמנית.
 async function generatePdfBlob() {
   const clone = page.cloneNode(true);
-  clone.style.position = "static"; // בתצוגה ה‑.page הוא absolute — מחזירים לזרימה רגילה לצילום
+  clone.style.position = "static"; // בתצוגה ה‑.page הוא absolute — מחזירים לזרימה רגילה
   clone.style.top = "auto";
   clone.style.right = "auto";
   clone.style.transform = "none";
@@ -108,14 +113,25 @@ async function generatePdfBlob() {
   const cloneBody = clone.querySelector(".page-body");
   if (cloneBody) cloneBody.classList.remove("is-empty");
 
+  // עוטף את העותק בפינה השמאלית‑עליונה (על המסך) — צילום אמין
   const wrap = document.createElement("div");
   wrap.style.position = "fixed";
-  wrap.style.left = "-10000px";
+  wrap.style.left = "0";
   wrap.style.top = "0";
   wrap.style.width = "210mm";
   wrap.style.background = "#ffffff";
+  wrap.style.zIndex = "2147483646";
   wrap.appendChild(clone);
+
+  // כיסוי לבן מעל הכול כדי שלא יראו הבזק בזמן הצילום
+  const cover = document.createElement("div");
+  cover.style.position = "fixed";
+  cover.style.inset = "0";
+  cover.style.background = "#ffffff";
+  cover.style.zIndex = "2147483647";
+
   document.body.appendChild(wrap);
+  document.body.appendChild(cover);
 
   try {
     const opt = {
@@ -128,6 +144,7 @@ async function generatePdfBlob() {
     return await html2pdf().set(opt).from(clone).outputPdf("blob");
   } finally {
     wrap.remove();
+    cover.remove();
   }
 }
 // חשיפה לבדיקות אוטומטיות
