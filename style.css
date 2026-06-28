@@ -341,6 +341,11 @@ html, body {
     margin: 0 auto !important;
   }
   .page-body.is-empty::before { content: "" !important; }
+}
 
-  @page { size: A4; margin: 0; }
+/* @page חייב להיות ברמה העליונה (לא בתוך @media) כדי שדפדפנים — בעיקר בטלפון —
+   באמת יכבדו אותו ויסירו את כותרת/כתובת האתר שהדפדפן מוסיף אוטומטית בהדפסה. */
+@page {
+  size: A4;
+  margin: 0;
 }
